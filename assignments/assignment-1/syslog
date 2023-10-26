@@ -1,0 +1,3 @@
+Oct 25 10:51:56 raspberrypi pthread[10123]: [COURSE:1][ASSIGNMENT:1]Linux raspberrypi 6.1.0-rpi4-rpi-v8 #1 SMP PREEMPT Debian 1:6.1.54-1+rpt2 (2023-10-05) aarch64 GNU/Linux
+Oct 25 10:51:56 raspberrypi pthread[10123]: [COURSE:1][ASSIGNMENT:1]Hello World from Main!
+Oct 25 10:51:56 raspberrypi pthread[10123]: [COURSE:1][ASSIGNMENT:1]Hello World from Thread!
