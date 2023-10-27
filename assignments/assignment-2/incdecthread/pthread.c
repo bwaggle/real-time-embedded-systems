@@ -1,3 +1,11 @@
+/**
+ * File: pthread.c
+ * Credit: based on RT embedded systems starter code
+ * Author: Brad Waggle
+ * Description: Assignment-1 Hello World!
+ * Date: October 27, 2023
+ */
+
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,7 +17,6 @@
 #define COURSE 1
 #define ASSIGNMENT 2
 
-#define COUNT  1000
 #define NUM_THREADS 128
 
 typedef struct
