@@ -42,8 +42,14 @@ void log_uname(int course, int assignment) {
         if (len > 0 && uname_output[len - 1] == '\n') {
             uname_output[len - 1] = '\0';
         }
+
+        openlog("pthread", LOG_PID, LOG_USER);
+
+        syslog(LOG_INFO, "%s", uname_output);
+
+        closelog();
         // Log the output of the uname command to the syslog
-        log_sys(uname_output, course, assignment);
+        // log_sys(uname_output, course, assignment);
     }
 
     pclose(uname_command);
