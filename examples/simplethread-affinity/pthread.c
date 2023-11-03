@@ -59,17 +59,24 @@ void set_scheduler(void)
 
     printf("INITIAL "); print_scheduler();
 
+    // Set scheduling policy to SCHED_FIFO
     pthread_attr_init(&fifo_sched_attr);
     pthread_attr_setinheritsched(&fifo_sched_attr, PTHREAD_EXPLICIT_SCHED);
     pthread_attr_setschedpolicy(&fifo_sched_attr, SCHED_POLICY);
+
+    // Zero out the CPU cores, which means use none of them
     CPU_ZERO(&cpuset);
+
+    // Run on only core 3
     cpuidx=(3);
     CPU_SET(cpuidx, &cpuset);
     pthread_attr_setaffinity_np(&fifo_sched_attr, sizeof(cpu_set_t), &cpuset);
 
+    // Set the priroity to MAX 
     max_prio=sched_get_priority_max(SCHED_POLICY);
     fifo_param.sched_priority=max_prio;    
 
+    // Also set the scheduler policy of the main process thread to SCHED_FIFO
     if((rc=sched_setscheduler(getpid(), SCHED_POLICY, &fifo_param)) < 0)
         perror("sched_setscheduler");
 
@@ -77,9 +84,6 @@ void set_scheduler(void)
 
     printf("ADJUSTED "); print_scheduler();
 }
-
-
-
 
 void *counterThread(void *threadp)
 {
