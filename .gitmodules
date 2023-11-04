@@ -1,0 +1,3 @@
+[submodule "class_code"]
+	path = class_code
+	url = git@github.com:siewertsmooc/RTES-ECEE-5623.git
