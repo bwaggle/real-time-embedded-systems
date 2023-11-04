@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include <sys_logger.h>
 
+
 // Course attribtues
 #define COURSE 1
 #define ASSIGNMENT 3

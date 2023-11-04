@@ -9,6 +9,7 @@
 #include <syslog.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 // Log a message to the syslog with course number and assignment number
 // Example format: 
@@ -16,7 +17,7 @@
 void log_sys(const char *msg, int course_num, int assignment_num) {
     openlog("pthread", LOG_PID, LOG_USER);
 
-    syslog(LOG_INFO, "[COURSE:%d][ASSIGNMENT:%d]%s", 
+    syslog(LOG_INFO, "[COURSE:%d][ASSIGNMENT:%d]: %s", 
             course_num,
             assignment_num, 
             msg);
@@ -42,18 +43,30 @@ void log_uname(int course, int assignment) {
         if (len > 0 && uname_output[len - 1] == '\n') {
             uname_output[len - 1] = '\0';
         }
-
-        openlog("pthread", LOG_PID, LOG_USER);
-
-        syslog(LOG_INFO, "%s", uname_output);
-
-        closelog();
         // Log the output of the uname command to the syslog
-        // log_sys(uname_output, course, assignment);
+        log_sys(uname_output, course, assignment);
     }
 
     pclose(uname_command);
 }
+
+void remove_first_line(const char *filename) {
+    char command[256]; // stores sed command
+
+    // Construct the `sed` command to remove the first line in the file
+    snprintf(command, sizeof(command), "sed -i '1d' %s", filename);
+
+    // Execute the `sed` command using the system function
+    int status = system(command);
+
+    // Check status and print error if necessary
+    if (status == -1) {
+        perror("Error running the 'sed' command");
+    } else {
+        printf("Removed the first line from %s\n", filename);
+    }
+}
+
 
 // Empties the syslog 
 void clear_syslog() {
@@ -72,6 +85,8 @@ void clear_syslog() {
 void copy_syslog(int course, int assignment) {
     char filename[100]; 
 
+    // Wait 1 second to give threads time to complete before copying
+    sleep(1);
     // Format the filename based on course and assignment
     snprintf(filename, sizeof(filename), "syslog-prog-%d.%d.txt", course, assignment);
 
@@ -87,6 +102,8 @@ void copy_syslog(int course, int assignment) {
         } else {
             printf("Failed to rename the copied syslog file.\n");
         }
+        // Remove first line of the syslog always inserted by the syslog daemon
+        remove_first_line(filename);
     } else {
         printf("Failed to copy syslog.\n");
     }
