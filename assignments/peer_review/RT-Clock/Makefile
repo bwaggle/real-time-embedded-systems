@@ -1,29 +1,31 @@
-INCLUDE_DIRS = 
+INCLUDE_DIRS = /home/bwaggle/Code/assignments/peer_review/RT-Clock
 LIB_DIRS = 
 CC=gcc
 
-CDEFS= 
-CFLAGS= -O3 -g $(INCLUDE_DIRS) $(CDEFS)
-LIBS= -lpthread -lrt
+CDEFS=
+CFLAGS= -O3 -I$(INCLUDE_DIRS) $(CDEFS)
+LIBS= 
 
-PRODUCT=posix_clock
-
-HFILES=
-CFILES= posix_clock.c
+HFILES= sys_logger.h
+CFILES= posix_clock.c sys_logger.c
 
 SRCS= ${HFILES} ${CFILES}
 OBJS= ${CFILES:.c=.o}
 
-all:	${PRODUCT}
+all:	posix_clock
 
 clean:
-	-rm -f *.o *.NEW *~ *.d
-	-rm -f ${PRODUCT} ${GARBAGE}
+	-rm -f *.o *.d
+	-rm -f perfmon posix_clock
 
-posix_clock:	posix_clock.o
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ posix_clock.o $(LIBS)
+distclean:
+	-rm -f *.o *.d
+	-rm -f posix_clock
+
+posix_clock: $(OBJS)  # Depend on object files
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $(OBJS) -lpthread
 
 depend:
 
 .c.o:
-	$(CC) -MD $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $<

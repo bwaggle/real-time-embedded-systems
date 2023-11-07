@@ -1,8 +1,8 @@
 /****************************************************************************/
 /* Function: nanosleep and POSIX 1003.1b RT clock demonstration             */
 /*                                                                          */
-/* Sam Siewert - 02/05/2011                                                 */
-/*                                                                          */
+/* Sam Siewert - 02/05/2011,                                                */
+/* Additional comments added by Brad Waggle 11/7/2023                       */
 /****************************************************************************/
 
 #include <pthread.h>
@@ -11,29 +11,33 @@
 #include <stdlib.h>
 #include <time.h>
 #include <errno.h>
+#include <sys_logger.h>
+
+#define COURSE 1
+#define ASSIGNMENT 99
 
 #define NSEC_PER_SEC (1000000000)  // Number of nanoseconds in a second
 #define NSEC_PER_MSEC (1000000)    // Number of nanoseconds in a millisecond
 #define NSEC_PER_USEC (1000)       // Number of nanoseconds in a microsecond
-#define ERROR (-1)                 // A constant representing an error condition
-#define OK (0)                     // A constant representing a successful or non-error condition
-#define TEST_SECONDS (0)           // The number of seconds for a test (initially set to 0)
-#define TEST_NANOSECONDS (NSEC_PER_MSEC * 10)  // The number of nanoseconds for a test (initially set to 10 milliseconds)
+#define ERROR (-1)                 // Error condition
+#define OK (0)                     // Non-error condition
+#define TEST_SECONDS (0)           // The number of seconds for a test 
+#define TEST_NANOSECONDS (NSEC_PER_MSEC * 10)  // The number of nanoseconds for a test 
 
 void end_delay_test(void);  // Function declaration for 'end_delay_test'
 
 // Static variables for working with time and sleep intervals
-static struct timespec sleep_time = {0, 0};           // Represents the time interval to sleep
-static struct timespec sleep_requested = {0, 0};      // Represents the requested sleep time
-static struct timespec remaining_time = {0, 0};        // Represents the remaining time after a sleep operation
+static struct timespec sleep_time = {0, 0};           // Time interval to sleep
+static struct timespec sleep_requested = {0, 0};      // Requested sleep time
+static struct timespec remaining_time = {0, 0};       // Time after a sleep operation
 
-static unsigned int sleep_count = 0;  // Counter to keep track of the number of sleep operations
+static unsigned int sleep_count = 0;  // Number of sleep operations
 
 // Thread-related variables
-pthread_t main_thread;            // Represents the main thread
-pthread_attr_t main_sched_attr;   // Thread attribute structure for the main thread
-int rt_max_prio, rt_min_prio, min; // Variables related to real-time scheduling priorities
-struct sched_param main_param;    // Scheduling parameters for the main thread
+pthread_t main_thread;            // Main thread
+pthread_attr_t main_sched_attr;   // Main thread attributes
+int rt_max_prio, rt_min_prio, min; // Real-time scheduling priorities
+struct sched_param main_param;    // Main thread Scheduling parameters
 
 
 
@@ -51,16 +55,16 @@ void print_scheduler(void)
     switch (schedType)
     {
         case SCHED_FIFO:
-            printf("Pthread policy is SCHED_FIFO\n"); // Print message for SCHED_FIFO policy.
+            printf("Pthread policy is SCHED_FIFO\n"); // SCHED_FIFO policy.
             break;
         case SCHED_OTHER:
-            printf("Pthread policy is SCHED_OTHER\n"); // Print message for SCHED_OTHER policy.
+            printf("Pthread policy is SCHED_OTHER\n"); // SCHED_OTHER policy.
             break;
         case SCHED_RR:
-            printf("Pthread policy is SCHED_RR\n"); // Print message for SCHED_RR policy.
+            printf("Pthread policy is SCHED_RR\n"); //  SCHED_RR policy.
             break;
         default:
-            printf("Pthread policy is UNKNOWN\n"); // Print a message for an unknown policy.
+            printf("Pthread policy is UNKNOWN\n"); // Unknown policy.
     }
 }
 
@@ -106,23 +110,21 @@ int delta_t(struct timespec *stop, struct timespec *start, struct timespec *delt
   // Case 1 - Less than a second of change
   if (dt_sec == 0)
   {
-    // printf("dt less than 1 second\n"); 
-
-    if (dt_nsec >= 0 && dt_nsec < NSEC_PER_SEC)
+    if (dt_nsec >= 0 && dt_nsec < NSEC_PER_SEC) // less than 1 seconds
     {
       // printf("nanosec greater at stop than start\n"); 
-      delta_t->tv_sec = 0;
-      delta_t->tv_nsec = dt_nsec;
+
+      delta_t->tv_sec = 0; // seconds = 0
+      delta_t->tv_nsec = dt_nsec; // difference in nanoseconds
     }
-    else if (dt_nsec > NSEC_PER_SEC)
+    else if (dt_nsec > NSEC_PER_SEC) // more than 1 second (overflow condition)
     {
-      // printf("nanosec overflow\n"); 
-      delta_t->tv_sec = 1;
-      delta_t->tv_nsec = dt_nsec - NSEC_PER_SEC;
+      delta_t->tv_sec = 1; // 1 second
+      delta_t->tv_nsec = dt_nsec - NSEC_PER_SEC; // difference in nanoseconds
     }
     else
     {
-      printf("stop is earlier than start\n");  // Print an error message when 'stop' is earlier than 'start'
+      printf("stop is earlier than start\n");  //  'stop' is earlier than 'start'
       return ERROR;  // Return an error code
     }
   }
@@ -130,8 +132,6 @@ int delta_t(struct timespec *stop, struct timespec *start, struct timespec *delt
   // Case 2 - More than a second of change, check for roll-over
   else if (dt_sec > 0)
   {
-    // printf("dt more than 1 second\n"); 
-
     if (dt_nsec >= 0 && dt_nsec < NSEC_PER_SEC)
     {
       // printf("nanosec greater at stop than start\n"); 
@@ -172,7 +172,7 @@ static struct timespec delay_error = {0, 0};
 /**
  * Delay Test Function
  * 
- * This function performs a delay test using POSIX clocks and nanosleep.
+ * Performs a delay test using POSIX clocks and nanosleep.
  *
  * @param threadID - A pointer to thread-specific data (not used in this function).
  *
@@ -189,7 +189,7 @@ void *delay_test(void *threadID)
 
     if (clock_getres(MY_CLOCK, &rtclk_resolution) == ERROR)
     {
-        perror("clock_getres");  // Print an error message if clock_getres fails.
+        perror("clock_getres");  // clock_getres fails.
         exit(-1);  // Exit the program with an error code.
     }
     else
@@ -214,10 +214,14 @@ void *delay_test(void *threadID)
         /* request sleep time and repeat if time remains */
         do
         {
+            // nanosleep for sleep_time
             if (rc = nanosleep(&sleep_time, &remaining_time) == 0) break;
 
+            // populate the remaining time
             sleep_time.tv_sec = remaining_time.tv_sec;
             sleep_time.tv_nsec = remaining_time.tv_nsec;
+
+            // increment the sleep count to avoid to many sleep calls
             sleep_count++;
         } while (((remaining_time.tv_sec > 0) || (remaining_time.tv_nsec > 0)) &&
                  (sleep_count < max_sleep_calls));
@@ -242,6 +246,7 @@ void *delay_test(void *threadID)
  */
 void end_delay_test(void) {
     double real_dt; // Declare a variable to store the real time difference.
+     char msg[512]; // Declare a character array 'msg' for syslog message.
 
 #if 0
     // The following code block is commented out and not used in the function.
@@ -258,6 +263,13 @@ void end_delay_test(void) {
     // Print the clock data including seconds, milliseconds, microseconds, nanoseconds, and real time difference.
     printf("MY_CLOCK clock DT seconds = %ld, msec=%ld, usec=%ld, nsec=%ld, sec=%6.9lf\n", 
            rtclk_dt.tv_sec, rtclk_dt.tv_nsec / 1000000, rtclk_dt.tv_nsec / 1000, rtclk_dt.tv_nsec, real_dt);
+    
+    // Construct syslog message with clock data
+    sprintf(msg, "MY_CLOCK clock DT seconds = %ld, msec=%ld, usec=%ld, nsec=%ld, sec=%6.9lf\n", 
+           rtclk_dt.tv_sec, rtclk_dt.tv_nsec / 1000000, rtclk_dt.tv_nsec / 1000, rtclk_dt.tv_nsec, real_dt);
+
+    // Log the message to the syslog with specified course and assignment identifiers.
+   log_sys(msg, COURSE, ASSIGNMENT);      
 
 #if 0
     // The following code block is commented out and not used in the function.
@@ -277,7 +289,7 @@ void end_delay_test(void) {
 #define RUN_RT_THREAD
 
 /**
- * Main function for a program that demonstrates scheduling policy adjustments and runs a real-time thread (if enabled).
+ * Demonstrates scheduling policy adjustments and runs a real-time thread (if enabled).
  * The program sets the scheduling policy to SCHED_FIFO and runs a real-time thread with the specified policy.
  * It also prints the scheduler information before and after adjustments.
  * 
@@ -286,6 +298,12 @@ void end_delay_test(void) {
 void main(void)
 {
    int rc, scope;
+
+    // Clear the syslog before starting
+   clear_syslog();
+
+   // Log machine info to the syslog
+   log_uname(COURSE, ASSIGNMENT);
 
    // Print scheduler information before adjustments
    printf("Before adjustments to scheduling policy:\n");
@@ -343,6 +361,9 @@ void main(void)
    // Run a non-real-time test function if the RUN_RT_THREAD flag is not set
    delay_test((void *)0);
 #endif
+
+  // Copy the updated syslog to the current project directory.
+  copy_syslog(COURSE, ASSIGNMENT);
 
    // Print a message indicating the test is complete
    printf("TEST COMPLETE\n");

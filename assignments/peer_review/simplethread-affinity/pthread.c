@@ -13,6 +13,11 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sched.h>
+#include <sys_logger.h>
+
+// Course attribtues
+#define COURSE 1
+#define ASSIGNMENT 99
 
 // Define the number of threads to be created
 #define NUM_THREADS 64
@@ -131,6 +136,7 @@ void *counterThread(void *threadp)
     pthread_t mythread;
     double start = 0.0, stop = 0.0;
     struct timeval startTime, stopTime;
+    char msg[512]; // Declare a character array 'msg' for syslog message.
 
     // Record the start time using gettimeofday and convert it to seconds.
     gettimeofday(&startTime, 0);
@@ -153,6 +159,14 @@ void *counterThread(void *threadp)
            threadParams->threadIdx,
            threadParams->threadIdx, sum, sched_getcpu(),
            start, stop);
+
+    sprintf(msg, "Thread idx=%d, sum[0...%d]=%d, running on CPU=%d, start=%lf, stop=%lf",
+        threadParams->threadIdx,
+        threadParams->threadIdx, sum, sched_getcpu(),
+        start, stop);
+
+     // Log the message to the syslog with specified course and assignment identifiers.
+   log_sys(msg, COURSE, ASSIGNMENT);
 }
 
 
@@ -195,6 +209,12 @@ int main(int argc, char *argv[]) {
     int i, j;
     cpu_set_t cpuset;
     pthread_t mainthread, startthread;
+
+   // Clear the syslog before starting
+   clear_syslog();
+
+   // Log machine info to the syslog
+   log_uname(COURSE, ASSIGNMENT);
     
     set_scheduler(); // Set scheduler policy and priority
 
@@ -224,6 +244,9 @@ int main(int argc, char *argv[]) {
 
     // Wait for the start thread to complete
     pthread_join(startthread, NULL);
+
+    // Copy the updated syslog to the current project directory.
+    copy_syslog(COURSE, ASSIGNMENT);
 
     printf("\nTEST COMPLETE\n");
     return 0;
