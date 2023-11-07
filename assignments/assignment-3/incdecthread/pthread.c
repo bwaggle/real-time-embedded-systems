@@ -167,10 +167,9 @@ void *starterThread(void *threadp)
 
 int main(int argc, char *argv[])
 {
-   int rc; // Declare an integer variable named 'rc'.
-   int i, j; // Declare two integer variables 'i' and 'j'.
-   cpu_set_t cpuset; // Declare a variable 'cpuset' of type 'cpu_set_t'.
-   int numberOfProcessors; // Declare an integer variable 'numberOfProcessors'.
+   int rc; // Holds error return code
+   int i, j; // Counters 'i' and 'j'
+   int numberOfProcessors; // number of processors in the system
 
    // Clear the syslog before starting
    clear_syslog();
@@ -186,8 +185,8 @@ int main(int argc, char *argv[])
    printf("The worker thread created will be run on a specific core based on thread index\n");
 
    // Obtain the maximum and minimum real-time priority values for the scheduling policy.
-   rt_max_prio = sched_get_priority_max(SCHED_POLICY);
-   rt_min_prio = sched_get_priority_min(SCHED_POLICY);
+   rt_max_prio = sched_get_priority_max(SCHED_POLICY); // typically 99
+   rt_min_prio = sched_get_priority_min(SCHED_POLICY); // typically 1
 
    // Get the process ID of the main thread.
    mainpid = getpid();

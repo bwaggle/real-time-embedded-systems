@@ -26,31 +26,19 @@ typedef struct
     int threadIdx;  // An integer to store the thread index
 } threadParams_t;
 
-// Declare an array to hold thread IDs for multiple threads
-pthread_t threads[NUM_THREADS];
 
-// Declare a thread ID for the main thread
-pthread_t mainthread;
-
-// Declare a thread ID for a starting thread (not used in the provided code)
-pthread_t startthread;
-
-// Declare an array to hold thread parameters, one for each thread
-threadParams_t threadParams[NUM_THREADS];
-
-// Declare attributes for FIFO scheduling policy
-pthread_attr_t fifo_sched_attr;
-
-// Declare original scheduling attributes (not used in the provided code)
-pthread_attr_t orig_sched_attr;
-
-// Declare scheduling parameters for FIFO scheduling policy
-struct sched_param fifo_param;
+pthread_t threads[NUM_THREADS]; // Holds thread IDs for multiple threads
+pthread_t mainthread; // Holds ID for the main thread
+pthread_t startthread; // Holds thread ID for a starting thread
+threadParams_t threadParams[NUM_THREADS]; // Holds thread parameters, one for each thread
+pthread_attr_t fifo_sched_attr; // Attributes for FIFO scheduling policy
+pthread_attr_t orig_sched_attr; // Original scheduling attributes
+struct sched_param fifo_param; // Scheduling parameters for FIFO scheduling policy
 
 // Define the scheduling policy as SCHED_FIFO (FIFO scheduling)
 #define SCHED_POLICY SCHED_FIFO
 
-// Define a constant representing the maximum number of iterations (used in the code)
+// Constant representing the maximum number of iterations
 #define MAX_ITERATIONS (1000000)
 
 
@@ -92,7 +80,7 @@ void set_scheduler(void)
     int max_prio, scope, rc, cpuidx;
     cpu_set_t cpuset;
 
-    // Print the current scheduler configuration
+    // Print the initial scheduler configuration
     printf("INITIAL "); print_scheduler();
 
     // Initialize thread attributes for SCHED_FIFO scheduling policy
@@ -105,7 +93,7 @@ void set_scheduler(void)
     // Zero out the CPU core mask
     CPU_ZERO(&cpuset);
 
-    // Set the CPU core to run on (in this case, core 3)
+    // Set the CPU core to run on core 3
     cpuidx = 3;
     CPU_SET(cpuidx, &cpuset);
     
@@ -131,7 +119,7 @@ void set_scheduler(void)
 
 
 // Function: counterThread
-// Description: This function is the main routine for a pthread. It calculates the sum of integers from 1 to threadParams->threadIdx
+// Description: Calculates the sum of integers from 1 to threadParams->threadIdx
 //              over MAX_ITERATIONS iterations and measures the execution time.
 // Parameters:
 //   - threadp: A pointer to threadParams_t structure containing thread-specific parameters.
@@ -174,7 +162,7 @@ void *counterThread(void *threadp)
  * This function is a starting point for a multi-threaded program.
  * It creates and manages multiple threads using the POSIX threads library.
  *
- * @param threadp: A pointer to the thread parameter data (if needed).
+ * @param threadp: A pointer to the thread parameter data.
  *
  * @return: None (void function).
  */
@@ -191,12 +179,10 @@ void *starterThread(void *threadp)
         // Set thread index for thread parameters.
         threadParams[i].threadIdx = i;
 
-        // Create a new pthread and pass it the following parameters:
-        // - &threads[i]: pointer to the thread descriptor
-        // - &fifo_sched_attr: use FIFO RT max priority attributes
-        // - counterThread: thread function entry point
-        // - (void *)&(threadParams[i]): parameters to pass into the thread
-        pthread_create(&threads[i], &fifo_sched_attr, counterThread, (void *)&(threadParams[i]));
+        pthread_create(&threads[i], // pointer to the thread descriptor
+                       &fifo_sched_attr, // use SCHED_POLICY attributes (i.e. SCHED_FIFO)
+                       counterThread, // thread function entry point
+                       (void *)&(threadParams[i])); // parameters to pass into the thread
     }
 
     // Wait for all created threads to complete before exiting.
@@ -209,13 +195,12 @@ int main(int argc, char *argv[]) {
     int i, j;
     cpu_set_t cpuset;
     pthread_t mainthread, startthread;
-    struct sched_param fifo_sched_attr;
-
+    
     set_scheduler(); // Set scheduler policy and priority
 
     CPU_ZERO(&cpuset); // Initialize the CPU affinity mask
 
-    // Get the affinity set for the main thread
+    // Get the identifier for the main thread
     mainthread = pthread_self();
 
     // Check the affinity mask assigned to the thread
@@ -234,9 +219,10 @@ int main(int argc, char *argv[]) {
     }
 
     // Create a new thread with FIFO real-time scheduling attributes
+    // The start thread spins off a number of additional worker threads
     pthread_create(&startthread, &fifo_sched_attr, starterThread, (void *)0);
 
-    // Wait for the starterThread to complete
+    // Wait for the start thread to complete
     pthread_join(startthread, NULL);
 
     printf("\nTEST COMPLETE\n");
