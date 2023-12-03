@@ -17,7 +17,7 @@
 void log_sys(const char *msg, int course_num, int assignment_num) {
     openlog("pthread", LOG_PID, LOG_USER);
 
-    syslog(LOG_CRIT, "[COURSE:%d][ASSIGNMENT:%d]: %s", 
+    syslog(LOG_INFO, "[COURSE:%d][ASSIGNMENT:%d]: %s", 
             course_num,
             assignment_num, 
             msg);

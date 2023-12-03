@@ -1,4 +1,4 @@
-INCLUDE_DIRS = /home/bwaggle/Code/assignments/assignment-4/incdecthread
+INCLUDE_DIRS =/home/bwaggle/Code/assignments/course-1/assignment-4/incdecthread
 LIB_DIRS = 
 CC=gcc
 
