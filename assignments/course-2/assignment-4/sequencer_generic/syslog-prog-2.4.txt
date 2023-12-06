@@ -1,0 +1,14 @@
+2023-12-06T05:04:01.233224-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Linux raspberrypi 6.1.0-rpi4-rpi-v8 #1 SMP PREEMPT Debian 1:6.1.54-1+rpt2 (2023-10-05) aarch64 GNU/Linux
+2023-12-06T05:04:02.246792-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Thread 1 start 1 @ 1.002797 on core 3 
+2023-12-06T05:04:02.248582-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Thread 2 start 1 @ 1.002797 on core 3 
+2023-12-06T05:04:02.249787-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Thread 3 start 1 @ 1.002797 on core 3 
+2023-12-06T05:04:02.250887-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Thread 4 start 1 @ 1.002797 on core 3 
+2023-12-06T05:04:02.266550-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Thread 1 start 3 @ 1.022746 on core 3 
+2023-12-06T05:04:02.286691-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Thread 1 start 5 @ 1.042689 on core 3 
+2023-12-06T05:04:02.295786-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Thread 2 start 6 @ 1.053725 on core 3 
+2023-12-06T05:04:02.306854-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Thread 1 start 7 @ 1.062842 on core 3 
+2023-12-06T05:04:02.315908-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Thread 3 start 8 @ 1.073892 on core 3 
+2023-12-06T05:04:02.326879-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Thread 1 start 9 @ 1.082979 on core 3 
+2023-12-06T05:04:02.346956-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Thread 1 start 11 @ 1.102902 on core 3 
+2023-12-06T05:04:02.347973-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Thread 2 start 11 @ 1.102902 on core 3 
+2023-12-06T05:04:02.367206-06:00 raspberrypi pthread[400982]: [COURSE:2][ASSIGNMENT:4]: Thread 1 start 13 @ 1.122829 on core 3 
